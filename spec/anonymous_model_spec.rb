@@ -19,8 +19,8 @@ describe APIToolsSpecs::AnonymousModel do
     end
 
     it 'creates a model that we can use' do
-      lambda { Bam.create goat: 'can' }.should change(Bam, :count).by(1)
-      Bam.last.goat.should == 'can'
+      expect { Bam.create goat: 'can' }.to change(Bam, :count).by(1)
+      expect(Bam.last.goat).to eq 'can'
     end
   end
 
@@ -36,7 +36,7 @@ describe APIToolsSpecs::AnonymousModel do
       end
 
       it 'has the correct class' do
-        Boom.new.association(:bam).klass.should == Bam
+        expect(Boom.new.association(:bam).klass).to eq Bam
       end
     end
 
@@ -44,11 +44,11 @@ describe APIToolsSpecs::AnonymousModel do
     it_behaves_like 'cleanup old classes'
 
     it 'removes the class after running' do
-      lambda { Bam }.should raise_exception NameError
+      expect { Bam }.to raise_exception NameError
     end
 
     it 'removes old tables' do
-      APIToolsSpecs::AnonymousModel::ConnectionHolder.connection.tables.should == []
+      expect(APIToolsSpecs::AnonymousModel::ConnectionHolder.connection.tables).to eq []
     end
   end
 end

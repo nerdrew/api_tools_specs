@@ -6,8 +6,8 @@ shared_examples "has_uuid" do
         model2 = build_valid_model
         model2.uuid = nil
         model2.valid?
-        model2.errors[:uuid].should be_empty
-        model2.uuid.should_not be_nil
+        expect(model2.errors[:uuid]).to be_empty
+        expect(model2.uuid).to_not be_nil
       end
 
       it 'does not allow a duplicate uuid' do
@@ -16,7 +16,7 @@ shared_examples "has_uuid" do
         model2 = build_valid_model
         model2.uuid = model1.uuid
         model2.valid?
-        model2.errors[:uuid].should == ['has already been taken']
+        expect(model2.errors[:uuid]).to eq ['has already been taken']
       end
     end
 
@@ -24,35 +24,35 @@ shared_examples "has_uuid" do
       it 'allows properly formatted uuids' do
         subject.uuid = '01234567-890a-bcde-f012-3456789abcde'
         subject.valid?
-        subject.errors[:uuid].should be_empty
+        expect(subject.errors[:uuid]).to be_empty
       end
     end
   end
 
-  it "should assign the model a uuid before it is validated" do
-    SecureRandom.stub(:uuid).and_return("random-uuid")
+  it "assigns the model a uuid before it is validated" do
+    allow(SecureRandom).to receive(:uuid).and_return("random-uuid")
     subject.valid?
-    subject.uuid.should == "random-uuid"
+    expect(subject.uuid).to eq "random-uuid"
   end
 
-  it "should not modify the uuid if it was created with one" do
+  it "does not modify the uuid if it was created with one" do
     subject.uuid = "My-Great-UUID"
     subject.valid?
-    subject.uuid.should == "My-Great-UUID"
+    expect(subject.uuid).to eq "My-Great-UUID"
   end
 
-  it "should not allow people to update the uuid after creation" do
-    subject.stub(:new_record?) { false }
-    lambda {
+  it "does not allow people to update the uuid after creation" do
+    allow(subject).to receive(:new_record?).and_return(false)
+    expect {
       subject.uuid = "foo"
-    }.should raise_error(ArgumentError, "Can't set the uuid after the object has been created (on #{described_class.to_s} with id: #{subject.id})")
+    }.to raise_error(ArgumentError, "Can't set the uuid after the object has been created (on #{described_class.to_s} with id: #{subject.id})")
   end
 
   describe '.find_uuid' do
     it 'returns the record with the given uuid' do
       model = build_valid_model
       model.save!
-      described_class.find_uuid(model.uuid).should == model
+      expect(described_class.find_uuid(model.uuid)).to eq model
     end
   end
 
@@ -62,36 +62,36 @@ shared_examples "has_uuid" do
       model1.save!
       model2 = build_valid_model
       model2.save!
-      described_class.find_uuids(model1.uuid, model2.uuid).should =~ [model1, model2]
+      expect(described_class.find_uuids(model1.uuid, model2.uuid)).to match [model1, model2]
     end
   end
 
   describe '.find_uuid!' do
     it 'calls .find_uuid' do
       collection = double
-      described_class.should_receive(:find_uuid).with('MY-UUID') { collection }
-      described_class.find_uuid!('MY-UUID').should == collection
+      expect(described_class).to receive(:find_uuid).with('MY-UUID') { collection }
+      expect(described_class.find_uuid!('MY-UUID')).to eq collection
     end
 
     it 'raises RecordNotFound if it cannot find the uuid' do
-      lambda do
+      expect do
         described_class.find_uuid!('01234567-890a-bcde-f012-3456789abcde')
-      end.should raise_exception APITools::RecordNotFound
+      end.to raise_exception APITools::RecordNotFound
     end
 
     it 'raises RecordNotFound if the uuid is invalid' do
-      lambda do
+      expect do
         described_class.find_uuid!('A')
-      end.should raise_exception APITools::RecordNotFound
+      end.to raise_exception APITools::RecordNotFound
     end
 
     it 'set the class and uuid as attributes on the error' do
       begin
         described_class.find_uuid!('A')
       rescue APITools::RecordNotFound => e
-        e.klass.should == described_class
-        e.attribute.should == :uuid
-        e.value.should == 'A'
+        expect(e.klass).to eq described_class
+        expect(e.attribute).to eq :uuid
+        expect(e.value).to eq 'A'
       end
     end
   end

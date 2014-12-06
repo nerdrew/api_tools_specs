@@ -14,7 +14,7 @@ shared_examples 'is_soft_deletable' do
       inactive.deleted = true
       inactive.save!
 
-      described_class.active.should == [active]
+      expect(described_class.active).to eq [active]
     end
   end
 
@@ -28,11 +28,11 @@ shared_examples 'is_soft_deletable' do
       model2.deleted = false
       model2.save!
 
-      described_class.active.should == [model1, model2]
+      expect(described_class.active).to eq [model1, model2]
 
       described_class.active.soft_delete
 
-      described_class.active.should be_empty
+      expect(described_class.active).to be_empty
     end
   end
 
@@ -47,7 +47,7 @@ shared_examples 'is_soft_deletable' do
 
       model.foo = 'boom'
       model.soft_delete
-      model.foo.should == 'bam'
+      expect(model.foo).to eq 'bam'
     end
 
     it "has an after_soft_delete callback" do
@@ -60,7 +60,7 @@ shared_examples 'is_soft_deletable' do
 
       model.foo = 'boom'
       model.soft_delete
-      model.foo.should == 'bam'
+      expect(model.foo).to eq 'bam'
     end
 
     it "has an around_soft_delete callback" do
@@ -78,8 +78,8 @@ shared_examples 'is_soft_deletable' do
 
       model.foo = 'boom'
       model.soft_delete
-      model.foo.should == 'bam'
-      model.should be_deleted
+      expect(model.foo).to eq 'bam'
+      expect(model).to be_deleted
     end
   end
 
@@ -88,21 +88,21 @@ shared_examples 'is_soft_deletable' do
       model = build_valid_model
       model.save!
       model.soft_delete
-      model.should be_deleted
+      expect(model).to be_deleted
     end
 
     it "sets assigns a time to 'deleted_at'" do
       model = build_valid_model
       model.save!
       model.soft_delete
-      model.deleted_at.should_not be_nil
+      expect(model.deleted_at).to_not be_nil
     end
 
     it "doesn't delete the record from the database" do
       model = build_valid_model
       model.save!
       model.soft_delete
-      model.should be_persisted
+      expect(model).to be_persisted
     end
   end
 end
